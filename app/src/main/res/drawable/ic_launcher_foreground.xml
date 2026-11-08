@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group>
+        <!-- Outer Bright Blue Camera Body -->
+        <path
+            android:pathData="M41,26 L67,26 A15,15 0 0,1 82,41 L82,67 A15,15 0 0,1 67,82 L41,82 A15,15 0 0,1 26,67 L26,41 A15,15 0 0,1 41,26 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="26"
+                    android:startY="26"
+                    android:endX="82"
+                    android:endY="82"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#009DFF" />
+                    <item android:offset="1.0" android:color="#0072FF" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Dark Blue 3D Folded Right Panel -->
+        <path
+            android:pathData="M62,26 L67,26 A15,15 0 0,1 82,41 L82,67 A15,15 0 0,1 67,82 L62,82 L58,67 L58,41 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="58"
+                    android:startY="26"
+                    android:endX="82"
+                    android:endY="82"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#005FD1" />
+                    <item android:offset="1.0" android:color="#0046B3" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Inner Dark Camera Cutout / Aperture -->
+        <path
+            android:pathData="M48,41 L60,41 A7,7 0 0,1 67,48 L67,60 A7,7 0 0,1 60,67 L48,67 A7,7 0 0,1 41,60 L41,48 A7,7 0 0,1 48,41 Z"
+            android:fillColor="#141722" />
+
+        <!-- Subtle Inner Camera Lens Accent -->
+        <path
+            android:pathData="M54,47 A7,7 0 1,1 53.99,47 Z"
+            android:strokeWidth="1.2"
+            android:strokeColor="#2B3246"
+            android:fillColor="#0F121C" />
+
+        <path
+            android:pathData="M54,51 A3,3 0 1,1 53.99,51 Z"
+            android:fillColor="#009DFF"
+            android:fillAlpha="0.6" />
+
+        <path
+            android:pathData="M52.5,49.5 A1,1 0 1,1 52.49,49.5 Z"
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.8" />
+    </group>
+</vector>

@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="12dp" android:background="#EEF1F8">
+
+    <!-- top bar -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+        <TextView android:id="@+id/fpsPill" style="@style/Pill" android:text="🎥  FPS: 0  ●" />
+        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+        <TextView android:id="@+id/battery" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="--%  🔋"
+            android:textStyle="bold" android:textColor="#5B6272" android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- big live preview: shows the whole camera picture, the frame marks what the PC receives.
+         Ratio below (5:6) = shape of the preview; if you change it, change the portrait preview size (720 x 864) in MainActivity too. -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="28dp" app:cardBackgroundColor="#000000"
+        app:cardElevation="0dp" app:strokeWidth="0dp">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <!-- invisible box that keeps the height even when the preview is hidden -->
+            <View android:id="@+id/previewBox" android:layout_width="0dp" android:layout_height="0dp"
+                android:visibility="invisible"
+                app:layout_constraintDimensionRatio="5:6"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <SurfaceView android:id="@+id/surface" android:layout_width="0dp" android:layout_height="0dp"
+                app:layout_constraintStart_toStartOf="@id/previewBox" app:layout_constraintEnd_toEndOf="@id/previewBox"
+                app:layout_constraintTop_toTopOf="@id/previewBox" app:layout_constraintBottom_toBottomOf="@id/previewBox" />
+            <TextView android:id="@+id/previewHidden" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:visibility="gone"
+                android:gravity="center" android:textColor="#8A8F9C" android:textSize="15sp"
+                android:text="Preview hidden\nSaves battery and heat"
+                app:layout_constraintStart_toStartOf="@id/previewBox" app:layout_constraintEnd_toEndOf="@id/previewBox"
+                app:layout_constraintTop_toTopOf="@id/previewBox" app:layout_constraintBottom_toBottomOf="@id/previewBox" />
+            <!-- resolution (top left) and view mode (top right, tap the preview or this to switch) -->
+            <TextView android:id="@+id/resPill" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_margin="12dp"
+                android:background="@drawable/bg_pill_dark" android:textColor="#FFFFFF"
+                android:textStyle="bold" android:textSize="12sp"
+                android:paddingStart="12dp" android:paddingEnd="12dp"
+                android:paddingTop="5dp" android:paddingBottom="5dp"
+                app:layout_constraintStart_toStartOf="@id/previewBox"
+                app:layout_constraintTop_toTopOf="@id/previewBox" />
+            <TextView android:id="@+id/modePill" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_margin="12dp"
+                android:background="@drawable/bg_pill_dark" android:textColor="#FFFFFF"
+                android:textStyle="bold" android:textSize="12sp"
+                android:paddingStart="12dp" android:paddingEnd="12dp"
+                android:paddingTop="5dp" android:paddingBottom="5dp"
+                android:text="Fill  ⇄"
+                app:layout_constraintEnd_toEndOf="@id/previewBox"
+                app:layout_constraintTop_toTopOf="@id/previewBox" />
+            <!-- buttons sit on the preview, like a camera app -->
+            <LinearLayout
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp" android:gravity="center" android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="@id/previewBox" app:layout_constraintEnd_toEndOf="@id/previewBox"
+                app:layout_constraintBottom_toBottomOf="@id/previewBox">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnPreview"
+                    android:layout_width="52dp" android:layout_height="52dp" android:text="👁" android:textSize="20sp"
+                    android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp" android:insetLeft="0dp"
+                    android:insetRight="0dp" app:backgroundTint="#FFFFFF" app:cornerRadius="26dp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnStream"
+                    android:layout_width="60dp" android:layout_height="60dp" android:layout_marginStart="20dp"
+                    android:text="■" android:textSize="22sp" android:padding="0dp"
+                    android:insetTop="0dp" android:insetBottom="0dp" android:insetLeft="0dp" android:insetRight="0dp"
+                    app:backgroundTint="#3B82F6" app:cornerRadius="30dp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnInfo"
+                    android:layout_width="52dp" android:layout_height="52dp" android:layout_marginStart="20dp"
+                    android:text="ℹ" android:textSize="20sp" android:textColor="#1F2330"
+                    android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp" android:insetLeft="0dp"
+                    android:insetRight="0dp" app:backgroundTint="#FFFFFF" app:cornerRadius="26dp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- controls -->
+    <ScrollView
+        android:id="@+id/controlsScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_slate"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="●  "
+                            android:textColor="#4ADE80"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvUrl"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCopy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:text="Copy"
+                            android:textSize="12sp"
+                            app:backgroundTint="#5E6678"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvTip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="✨ Open Novacami Desktop - it finds your phone, then enter the PIN below"
+                        android:textColor="#4ADE80"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvStats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#E5E7EE"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="USB mode: adb forward tcp:8080 tcp:8080"
+                        android:textColor="#B9BECB"
+                        android:textSize="11sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvPin"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="PIN  ------"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:text="Change PIN"
+                            android:textSize="12sp"
+                            app:backgroundTint="#5E6678"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- be right back -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBrb"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="☕  Be right back"
+                    android:textColor="#1F2330"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#FFFFFF"
+                    app:cornerRadius="26dp" />
+
+                <!-- camera: zoom / exposure / white balance / torch -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Zoom"
+                            android:textColor="#1F2330" android:textSize="15sp" android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvZoom"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="1.0×" android:textColor="#1F2330"
+                            android:textSize="15sp" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderZoom"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:enabled="false" android:value="1" android:valueFrom="1" android:valueTo="2" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnZoomMin"
+                            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                            android:layout_marginEnd="6dp" android:insetTop="0dp" android:insetBottom="0dp"
+                            android:text="0.5×" android:textColor="#1F2330" android:textSize="13sp"
+                            app:backgroundTint="#E4E8F2" app:cornerRadius="16dp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnZoom1"
+                            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                            android:layout_marginEnd="6dp" android:insetTop="0dp" android:insetBottom="0dp"
+                            android:text="1×" android:textColor="#1F2330" android:textSize="13sp"
+                            app:backgroundTint="#E4E8F2" app:cornerRadius="16dp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnZoom2"
+                            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                            android:insetTop="0dp" android:insetBottom="0dp"
+                            android:text="2×" android:textColor="#1F2330" android:textSize="13sp"
+                            app:backgroundTint="#E4E8F2" app:cornerRadius="16dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+                    <LinearLayout style="@style/Tile">
+                        <LinearLayout
+                            android:layout_width="match_parent" android:layout_height="wrap_content">
+                            <TextView style="@style/TileLabel" android:layout_width="0dp"
+                                android:layout_weight="1" android:text="Exposure" />
+                            <TextView android:id="@+id/tvEv"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="+0.0" android:textColor="#1F2330"
+                                android:textSize="12sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/sliderEv"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:enabled="false" android:value="0" android:valueFrom="-2" android:valueTo="2" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Tile">
+                        <TextView style="@style/TileLabel" android:text="White balance" />
+                        <Spinner android:id="@+id/spWb" style="@style/PillSpinner"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <LinearLayout style="@style/Tile">
+                        <TextView style="@style/TileLabel" android:text="Torch (rear)" />
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/swTorch"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_gravity="end" android:layout_marginTop="8dp" />
+                    </LinearLayout>
+                    <LinearLayout style="@style/Tile">
+                        <TextView style="@style/TileLabel" android:text="Camera" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCamReset"
+                            android:layout_width="match_parent" android:layout_height="40dp"
+                            android:layout_marginTop="6dp" android:insetTop="0dp" android:insetBottom="0dp"
+                            android:text="Reset" android:textColor="#1F2330" android:textSize="13sp"
+                            app:backgroundTint="#E4E8F2" app:cornerRadius="16dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:padding="8dp">
+
+                    <Spinner
+                        android:id="@+id/spBg"
+                        style="@style/PillSpinner"
+                        android:layout_width="0dp"
+                        android:layout_weight="1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFlip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="8dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="Flip camera"
+                        android:textColor="#1F2330"
+                        android:textSize="13sp"
+                        app:backgroundTint="#E4E8F2"
+                        app:cornerRadius="16dp" />
+                </LinearLayout>
+                <!-- shown only while the thermal guard has paused the background effect -->
+                <TextView
+                    android:id="@+id/tvBgNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="4dp"
+                    android:text="⏸ Effect paused - phone is warm. It resumes when it cools down."
+                    android:textColor="#B45309"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+                <!-- shown only when "Background: My picture" is selected -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBgPic"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="6dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="🖼  Choose background picture"
+                    android:textColor="#1F2330"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:backgroundTint="#E4E8F2"
+                    app:cornerRadius="22dp" />
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+
+                    <LinearLayout style="@style/Tile">
+
+                        <TextView
+                            style="@style/TileLabel"
+                            android:text="Noise reduction" />
+
+                        <Spinner
+                            android:id="@+id/spNoise"
+                            style="@style/PillSpinner"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/Tile">
+
+                        <TextView
+                            style="@style/TileLabel"
+                            android:text="Mirror" />
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/swMirror"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginTop="8dp" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/Tile">
+
+                        <TextView
+                            style="@style/TileLabel"
+                            android:text="Auto ISO" />
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/swAuto"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginTop="8dp"
+                            android:checked="true" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ISO"
+                        android:textColor="#1F2330"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderIso"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:value="400"
+                        android:valueFrom="100"
+                        android:valueTo="3200" />
+
+                    <TextView
+                        android:id="@+id/tvIso"
+                        android:layout_width="48dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:text="400"
+                        android:textColor="#1F2330"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout style="@style/Tile">
+
+                        <TextView
+                            style="@style/TileLabel"
+                            android:text="Resolution" />
+
+                        <Spinner
+                            android:id="@+id/spRes"
+                            style="@style/PillSpinner"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/Tile">
+
+                        <TextView
+                            style="@style/TileLabel"
+                            android:text="FPS" />
+
+                        <Spinner
+                            android:id="@+id/spFps"
+                            style="@style/PillSpinner"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnQuality"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_margin="4dp"
+                        android:layout_weight="1"
+                        android:text="★ High Quality"
+                        android:textSize="12sp"
+                        app:cornerRadius="24dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLatency"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_margin="4dp"
+                        android:layout_weight="1"
+                        android:text="⚡ Low Latency"
+                        android:textColor="#1F2330"
+                        android:textSize="12sp"
+                        app:backgroundTint="#FFFFFF"
+                        app:cornerRadius="24dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnBattery"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_margin="4dp"
+                        android:layout_weight="1"
+                        android:text="🔋 Battery Saver"
+                        android:textColor="#1F2330"
+                        android:textSize="12sp"
+                        app:backgroundTint="#FFFFFF"
+                        app:cornerRadius="24dp" />
+                </LinearLayout>
+
+                <!-- AdMob banner: bottom of the controls, only visible while streaming is stopped -->
+                <FrameLayout
+                    android:id="@+id/adContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:minHeight="50dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+    </ScrollView>
+</LinearLayout>
